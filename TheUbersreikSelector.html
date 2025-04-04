@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>The Ubersreik Selector</title>
+
+  <!-- Fantasy font -->
+  <link href="https://fonts.googleapis.com/css2?family=UnifrakturCook:wght@700&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      font-family: 'Georgia', serif;
+      background: #1c1c1c url('https://www.transparenttextures.com/patterns/asfalt-light.png') repeat;
+      color: #f5f5f5;
+      text-align: center;
+      padding: 60px 20px;
+      transition: background-color 0.5s ease;
+    }
+
+    h1 {
+      font-family: 'UnifrakturCook', cursive;
+      font-size: 48px;
+      margin-bottom: 10px;
+      color: #d4af37;
+      text-shadow: 2px 2px 6px rgba(0,0,0,0.6);
+    }
+
+    h2 {
+      font-size: 20px;
+      color: #aaa;
+      margin-bottom: 40px;
+      font-style: italic;
+    }
+
+    button {
+      padding: 12px 24px;
+      font-size: 18px;
+      cursor: pointer;
+      border: none;
+      background-color: #8a3f2c;
+      color: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+      transition: transform 0.2s ease;
+    }
+
+    button:hover {
+      transform: scale(1.05);
+      background-color: #a94e38;
+    }
+
+    .result {
+      margin-top: 40px;
+      font-size: 22px;
+      background-color: #2c2c2c;
+      padding: 20px;
+      border-radius: 10px;
+      display: inline-block;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+      transition: background-color 0.5s ease;
+    }
+
+    .result span {
+      display: block;
+      margin-top: 12px;
+    }
+
+    @media (max-width: 600px) {
+      body {
+        padding: 30px 10px;
+      }
+
+      h1 {
+        font-size: 36px;
+      }
+
+      .result {
+        font-size: 18px;
+        padding: 15px;
+      }
+
+      button {
+        font-size: 16px;
+        padding: 10px 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>The Ubersreik Selector</h1>
+  <h2>A Vermintide 2 Hero Randomizer</h2>
+</br>
+  <button onclick="rollHero()">🎲 Roll a Hero!</button>
+  </br>
+  <div class="result" id="result"></div>
+
+  <audio id="rollSound" src="https://cdn.pixabay.com/audio/2022/03/24/audio_3c05fb9e91.mp3" preload="auto"></audio>
+
+  <script>
+    const careers = {
+      "Kruber": {
+        "Mercenary": { melee: ["Greatsword","Halberd", "Sword", "Executioner Sword", "Great Hammer", "Sword and Shield", "Mace", "Mace and Shield", "Mace and Sword", "Spear and Shield", "Tuskgor Spear", "Bretonnian Longsword"], ranged: ["Blunderbuss", "Handgun", "Repeater Handgun"] },
+        "Huntsman": { melee: ["Greatsword","Halberd", "Sword", "Executioner Sword", "Great Hammer", "Sword and Shield", "Mace", "Mace and Shield", "Mace and Sword", "Spear and Shield", "Tuskgor Spear", "Bretonnian Longsword"], ranged: ["Blunderbuss", "Handgun", "Longbow", "Repeater Handgun"] },
+        "Foot Knight": { melee: ["Greatsword","Halberd", "Sword", "Executioner Sword", "Great Hammer", "Sword and Shield", "Mace", "Mace and Shield", "Mace and Sword", "Spear and Shield", "Bretonnian Longsword"], ranged: ["Handgun", "Blunderbuss"] },
+        "Grail Knight": { melee: ["Greatsword", "Sword", "Executioner Sword", "Great Hammer", "Sword and Shield", "Mace", "Mace and Shield", "Mace and Sword", "Bretonnian Longsword", "Bretonnian Sword and Shield"], ranged: ["Greatsword", "Sword", "Executioner Sword", "Great Hammer", "Sword and Shield", "Mace", "Mace and Shield", "Mace and Sword", "Bretonnian Longsword", "Bretonnian Sword and Shield"] }
+      },
+      "Bardin": {
+        "Ranger Veteran": { melee: ["Great Hammer", "Great Axe", "Axe", "Hammer", "War Pick", "Axe and Shield", "Hammer and Shield", "Dual Hammers", "Cog Hammer"], ranged: ["Crossbow", "Handgun", "Grudge-Raker", "Throwing Axes", "Masterwork Pistol"] },
+        "Ironbreaker": { melee: ["Great Hammer", "Great Axe", "Axe", "Hammer", "War Pick", "Axe and Shield", "Hammer and Shield", "Dual Hammers", "Cog Hammer"], ranged: ["Crossbow", "Handgun", "Drakefire Pistols", "Drakegun", "Grudge-Raker", "Trollhammer Torpedo"] },
+        "Slayer": { melee: ["Great Hammer", "Great Axe", "Axe", "Hammer", "War Pick", "Dual Axes", "Dual Hammers", "Cog Hammer"], ranged: ["Great Hammer", "Great Axe", "Axe", "Hammer", "War Pick", "Dual Axes", "Dual Hammers", "Cog Hammer", "Throwing Axes"] },
+        "Outcast Engineer": { melee: ["Great Hammer", "Great Axe", "Axe", "Hammer", "War Pick", "Axe and Shield", "Hammer and Shield", "Dual Hammers", "Cog Hammer"], ranged: ["Handgun", "Drakefire Pistols", "Drakegun", "Grudge-Raker", "Masterwork Pistol", "Trollhammer Torpedo"] }
+      },
+      "Kerillian": {
+        "Waystalker": { melee: ["Sword", "Dual Daggers", "Dual Swords", "Sword and Dagger", "Glaive", "Greatsword", "Elven Spear", "Elven Axe"], ranged: ["Swiftbow", "Longbow", "Hagbane Shortbow", "Moonfire Bow", "Briar Javelin"] },
+        "Handmaiden": { melee: ["Sword", "Dual Daggers", "Dual Swords", "Sword and Dagger", "Glaive", "Greatsword", "Elven Spear", "Elven Axe", "Spear and Shield"], ranged: ["Swiftbow", "Longbow", "Hagbane Shortbow", "Moonfire Bow", "Briar Javelin"] },
+        "Shade": { melee: ["Sword", "Dual Daggers", "Dual Swords", "Sword and Dagger", "Glaive", "Greatsword", "Elven Spear", "Elven Axe"], ranged: ["Swiftbow", "Longbow", "Hagbane Shortbow", "Volley Crossbow", "Moonfire Bow", "Briar Javelin"] },
+        "Sister of the Thorn": { melee: ["Sword", "Dual Daggers", "Dual Swords", "Sword and Dagger", "Glaive", "Greatsword", "Elven Spear", "Elven Axe"], ranged: ["Swiftbow", "Longbow", "Hagbane Shortbow", "Moonfire Bow", "Deepwood Staff", "Briar Javelin"] }
+      },
+      "Sienna": {
+        "Battle Wizard": { melee: ["Ensorcelled Reaper", "Sword", "Mace", "Fire Sword", "Dagger", "Crowbill", "Flaming Flail"], ranged: ["Fireball Staff", "Flamestorm Staff", "Bolt Staff", "Beam Staff", "Conflagration Staff", "Coruscation Staff"] },
+        "Pyromancer": { melee: ["Ensorcelled Reaper", "Sword", "Mace", "Fire Sword", "Dagger", "Crowbill", "Flaming Flail"], ranged: ["Fireball Staff", "Flamestorm Staff", "Bolt Staff", "Beam Staff", "Conflagration Staff", "Coruscation Staff"] },
+        "Unchained": { melee: ["Ensorcelled Reaper", "Sword", "Mace", "Fire Sword", "Dagger", "Crowbill", "Flaming Flail"], ranged: ["Fireball Staff", "Flamestorm Staff", "Bolt Staff", "Beam Staff", "Conflagration Staff", "Coruscation Staff"] },
+		"Necromancer": { melee: ["Ensorcelled Reaper", "Sword", "Mace", "Fire Sword", "Dagger", "Crowbill", "Flaming Flail"], ranged: ["Soulstealer Staff", "Fireball Staff", "Flamestorm Staff", "Bolt Staff", "Beam Staff", "Conflagration Staff", "Coruscation Staff"] }
+      },
+      "Saltzpyre": {
+        "Witch Hunter Captain": { melee: ["Rapier", "Falchion", "Axe", "Greatsword", "Flail", "Axe and Falchion", "Bill Hook"], ranged: ["Brace of Pistols", "Griffon-Foot pistols", "Volley Crossbow", "Repeater Pistol", "Crossbow"] },
+        "Bounty Hunter": { melee: ["Rapier", "Falchion", "Axe", "Greatsword", "Flail", "Axe and Falchion", "Bill Hook"], ranged: ["Brace of Pistols", "Griffon-Foot pistols", "Volley Crossbow", "Repeater Pistol", "Crossbow"] },
+        "Zealot": { melee: ["Rapier", "Falchion", "Axe", "Greatsword", "Flail", "Axe and Falchion", "Bill Hook", "Reckoner Great Hammer", "Paired Skull-Splitters"], ranged: ["Brace of Pistols", "Griffon-Foot pistols", "Volley Crossbow", "Repeater Pistol", "Crossbow"] },
+        "Warrior Priest": { melee: ["Flail and Shield", "Reckoner Great Hammer", "Paired Skull-Splitters", "Skull-Splitter and Blessed Tome", "Skull-Splitter and Shield", "Skull-Splitter Hammer"], ranged: ["Flail and Shield", "Reckoner Great Hammer", "Paired Skull-Splitters", "Skull-Splitter and Blessed Tome", "Skull-Splitter and Shield", "Skull-Splitter Hammer"] }
+      }
+    };
+
+    const careerPortraits = {
+      "Kruber_Mercenary": "https://static.wikia.nocookie.net/vermintide2_gamepedia_en/images/0/0d/Portrait_kruber_mercenary.png/revision/latest?cb=20180307122551",
+      "Kruber_Huntsman": "https://static.wikia.nocookie.net/vermintide2_gamepedia_en/images/a/ad/Portrait_kruber_huntsman.png/revision/latest?cb=20180307122552",
+      "Kruber_Foot Knight": "https://static.wikia.nocookie.net/vermintide2_gamepedia_en/images/e/e3/Portrait_kruber_footknight.png/revision/latest?cb=20180307122551",
+      "Kruber_Grail Knight": "https://static.wikia.nocookie.net/vermintide2_gamepedia_en/images/0/0f/Portrait_kruber_grailknight.png/revision/latest?cb=20210111151043",
+
+      "Bardin_Ranger Veteran": "https://static.wikia.nocookie.net/vermintide2_gamepedia_en/images/c/c2/Portrait_bardin_veteranranger.png/revision/latest?cb=20180307122551",
+      "Bardin_Ironbreaker": "https://static.wikia.nocookie.net/vermintide2_gamepedia_en/images/1/1d/Portrait_bardin_ironbreaker.png/revision/latest?cb=20180307122550",
+      "Bardin_Slayer": "https://static.wikia.nocookie.net/vermintide2_gamepedia_en/images/7/7e/Portrait_bardin_slayer.png/revision/latest?cb=20180307122550",
+      "Bardin_Outcast Engineer": "https://static.wikia.nocookie.net/vermintide2_gamepedia_en/images/a/a6/Portrait_bardin_outcastengineer.png/revision/latest?cb=20240408063115",
+
+      "Kerillian_Waystalker": "https://static.wikia.nocookie.net/vermintide2_gamepedia_en/images/1/12/Portrait_kerillian_waystalker.png/revision/latest?cb=20180307122551",
+      "Kerillian_Handmaiden": "https://static.wikia.nocookie.net/vermintide2_gamepedia_en/images/c/ce/Portrait_kerillian_handmaiden.png/revision/latest?cb=20180307122551",
+      "Kerillian_Shade": "https://static.wikia.nocookie.net/vermintide2_gamepedia_en/images/a/a1/Portrait_kerillian_shade.png/revision/latest?cb=20180307122551",
+      "Kerillian_Sister of the Thorn": "https://static.wikia.nocookie.net/vermintide2_gamepedia_en/images/6/6a/Portrait_SisterOfTheThorn.png/revision/latest?cb=20211225174413",
+
+      "Sienna_Battle Wizard": "https://static.wikia.nocookie.net/vermintide2_gamepedia_en/images/a/a9/Portrait_sienna_battlewizard.png/revision/latest?cb=20180307122552",
+      "Sienna_Pyromancer": "https://static.wikia.nocookie.net/vermintide2_gamepedia_en/images/1/11/Portrait_sienna_pyromancer.png/revision/latest?cb=20180307122552",
+      "Sienna_Unchained": "https://static.wikia.nocookie.net/vermintide2_gamepedia_en/images/b/b3/Portrait_sienna_unchained.png/revision/latest?cb=20180307122553",
+	  "Sienna_Necromancer": "https://static.wikia.nocookie.net/vermintide2_gamepedia_en/images/a/a7/Portrait_Necromancer.png/revision/latest?cb=20241203192708",
+
+      "Saltzpyre_Witch Hunter Captain": "https://static.wikia.nocookie.net/vermintide2_gamepedia_en/images/4/4b/Portrait_saltzpyre_witchhuntercapatain.png/revision/latest?cb=20180307122551",
+      "Saltzpyre_Bounty Hunter": "https://static.wikia.nocookie.net/vermintide2_gamepedia_en/images/e/e8/Portrait_saltzpyre_bountyhunter.png/revision/latest?cb=20180307122552",
+      "Saltzpyre_Zealot": "https://static.wikia.nocookie.net/vermintide2_gamepedia_en/images/5/53/Portrait_saltzpyre_zealot.png/revision/latest?cb=20180307122552",
+      "Saltzpyre_Warrior Priest": "https://static.wikia.nocookie.net/vermintide2_gamepedia_en/images/5/52/Portrait_WarriorPriestOfSigmar.png/revision/latest?cb=20211224203339"
+    };
+
+    const careerThemes = {
+      "Mercenary": "#334155",
+      "Huntsman": "#475569",
+      "Foot Knight": "#64748b",
+      "Grail Knight": "#7c3aed",
+      "Ranger Veteran": "#374151",
+      "Ironbreaker": "#1e293b",
+      "Slayer": "#991b1b",
+      "Outcast Engineer": "#4b5563",
+      "Waystalker": "#14532d",
+      "Handmaiden": "#16a34a",
+      "Shade": "#0f172a",
+      "Sister of the Thorn": "#22c55e",
+      "Battle Wizard": "#f97316",
+      "Pyromancer": "#dc2626",
+      "Unchained": "#7f1d1d",
+	  "Necromancer": "#264647", 
+      "Witch Hunter Captain": "#4b5563",
+      "Bounty Hunter": "#3f3f46",
+      "Zealot": "#7f1d1d",
+      "Warrior Priest": "#a16207"
+    };
+
+    function getRandom(arr) {
+      return arr[Math.floor(Math.random() * arr.length)];
+    }
+
+    function rollHero() {
+      const audio = document.getElementById("rollSound");
+      audio.currentTime = 0;
+      audio.play();
+
+      const heroNames = Object.keys(careers);
+      const randomHero = getRandom(heroNames);
+      const heroCareers = Object.keys(careers[randomHero]);
+      const randomCareer = getRandom(heroCareers);
+
+      const meleeOptions = careers[randomHero][randomCareer].melee;
+      const rangedOptions = careers[randomHero][randomCareer].ranged;
+
+      const randomMelee = meleeOptions.length ? getRandom(meleeOptions) : "None";
+      const randomRanged = rangedOptions.length ? getRandom(rangedOptions) : "None";
+
+      const key = `${randomHero}_${randomCareer}`;
+      const portraitURL = careerPortraits[key] || "https://via.placeholder.com/100?text=No+Image";
+      const portraitImg = `<img src="${portraitURL}" alt="${randomCareer}" style="margin-top:15px;width:100px;border-radius:10px;">`;
+
+      const bgColor = careerThemes[randomCareer] || "#2c2c2c";
+      document.querySelector(".result").style.backgroundColor = bgColor;
+
+      document.getElementById("result").innerHTML = `
+        <span><strong>${randomHero}</strong> — <em>${randomCareer}</em></span>
+		 ${portraitImg}
+        <span>🗡️ Melee Weapon: <strong>${randomMelee}</strong></span>
+        <span>🏹 Ranged Weapon: <strong>${randomRanged}</strong></span>
+       
+      `;
+    }
+  </script>
+
+</body>
+</html>
