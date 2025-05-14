@@ -190,6 +190,15 @@
          
          updateDropdowns(randomHero, randomCareer);
          displayLoadout(randomHero, randomCareer);
+         
+         
+         }
+         
+         function logRoll(hero, career, melee, ranged) {
+         const timestamp = new Date().toLocaleTimeString('en-GB', { hour12: false }) + '.' + String(new Date().getMilliseconds()).padStart(3, '0');
+         const logEntry = document.createElement("li");
+         logEntry.innerHTML = `[${timestamp}] <strong>${hero}</strong> — <em>${career}</em> | 🗡️ ${melee} | 🏹 ${ranged}`;
+         document.getElementById("logList").prepend(logEntry);
          }
          
          function rollWeaponsOnly() {
@@ -222,6 +231,7 @@
            <span>🏹 Ranged Weapon: <strong>${randomRanged}</strong></span>
            <img src="${portraitURL}" alt="${career}" style="margin-top:15px;width:100px;border-radius:10px;">
          `;
+         logRoll(hero, career, randomMelee, randomRanged);			
          }
          
          function populateCareers() {
@@ -258,6 +268,10 @@
       </script>
       </br>
       </br>
+      <div id="log" style="margin-top: 60px; text-align: left; max-width: 800px; margin-left: auto; margin-right: auto; font-size: 14px; background-color: #2c2c2c; padding: 15px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.3); overflow-y: auto; max-height: 300px;">
+         <strong>Roll Log:</strong>
+         <ul id="logList" style="list-style-type: none; padding-left: 0;"></ul>
+      </div>
       </br>
       <footer style="text-align:center; padding:1em 0; background:#B26840;">
          <a href="https://ratslappers.wordpress.com" target="_blank">🌐 Visit our Website</a> | 
